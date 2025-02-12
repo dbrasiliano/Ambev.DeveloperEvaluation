@@ -25,6 +25,18 @@ namespace Ambev.DeveloperEvaluation.Domain.Validation
 
             RuleFor(sale => sale.IsCancelled)
                 .Must(isCancelled => !isCancelled).WithMessage("Sale cannot be cancelled at creation.");
+
+            RuleForEach(x => x.Items).ChildRules(items =>
+            {
+                items.RuleFor(i => i.ProductId)
+                    .NotEmpty().WithMessage("O ID do produto é obrigatório.");
+
+                items.RuleFor(i => i.Quantity)
+                    .GreaterThan(0).WithMessage("A quantidade do item deve ser maior que zero.");
+
+                items.RuleFor(i => i.UnitPrice)
+                    .GreaterThan(0).WithMessage("O preço unitário do item deve ser maior que zero.");
+            });
         }
     }
 }

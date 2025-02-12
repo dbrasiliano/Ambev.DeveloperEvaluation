@@ -24,11 +24,6 @@ public class CreateSaleResponse
     /// A data e hora em que a venda foi criada.
     /// </summary>
     public DateTime CreatedAt { get; set; }
-
-    /// <summary>
-    /// A lista de itens vendidos.
-    /// </summary>
-    public List<SaleItemResponse> Items { get; set; } = new();
 }
 
 /// <summary>

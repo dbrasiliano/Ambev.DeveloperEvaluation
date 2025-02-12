@@ -11,11 +11,6 @@ public class CreateSaleRequest
     public string SaleNumber { get; set; } = string.Empty;
 
     /// <summary>
-    /// Obtém ou define o valor total da venda.
-    /// </summary>
-    public decimal TotalAmount { get; set; }
-
-    /// <summary>
     /// Obtém ou define o identificador da filial onde a venda foi realizada.
     /// </summary>
     public string BranchId { get; set; } = string.Empty;
