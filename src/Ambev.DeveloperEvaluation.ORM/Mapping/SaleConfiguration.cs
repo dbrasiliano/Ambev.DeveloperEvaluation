@@ -37,7 +37,6 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
         builder.Property(s => s.CreatedAt)
             .IsRequired();
 
-        builder.Property(s => s.UpdatedAt)
-        .IsRequired();
+        builder.Property(s => s.UpdatedAt);
     }
 }

@@ -45,7 +45,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         /// </summary>
         string ISale.Id => Id.ToString();
 
-        IEnumerable<ISaleItem> ISale.Items => throw new NotImplementedException();
+        IEnumerable<ISaleItem> ISale.Items => new List<SaleItem>();
 
         /// <summary>
         /// Gets or sets the date and time when the sale was created.
