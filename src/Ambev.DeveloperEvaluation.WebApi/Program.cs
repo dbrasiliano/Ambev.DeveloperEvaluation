@@ -9,6 +9,14 @@ using Ambev.DeveloperEvaluation.WebApi.Middleware;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Rebus.Config;
+using Rebus.Routing;
+using Rebus.Transport.InMem;
+using Ambev.DeveloperEvaluation.Domain.Interfaces;
+using System.Reflection;
+using Rebus.Routing.TypeBased;
+using Microsoft.Extensions.DependencyInjection;
+using Ambev.DeveloperEvaluation.Domain.Events;
 
 namespace Ambev.DeveloperEvaluation.WebApi;
 
@@ -33,7 +41,31 @@ public class Program
                 options.UseNpgsql(
                     builder.Configuration.GetConnectionString("DefaultConnection"),
                     b => b.MigrationsAssembly("Ambev.DeveloperEvaluation.ORM")
-                )
+            )
+            );
+
+            //string rabbitMqConnectionString = "amqp://guest:guest@localhost:5672";
+
+            //builder.Services.AddRebus(configure => configure
+            //    .Transport(t => t.UseRabbitMq(rabbitMqConnectionString, "default_queue"))
+            //    .Routing(r =>
+            //    {
+            //        var typeBasedRouter = r.TypeBased();
+
+            //        var eventTypes = Assembly.GetAssembly(typeof(IEvent))
+            //            .GetTypes()
+            //            .Where(t => typeof(IEvent).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+
+            //        foreach (var eventType in eventTypes)
+            //        {
+            //            typeBasedRouter.Map(eventType, "queue");
+            //        }
+            //    })
+            //);
+
+            builder.Services.AddRebus(configure => configure
+                .Transport(t => t.UseInMemoryTransport(new InMemNetwork(), "sales_queue"))
+                .Routing(r => r.TypeBased().Map<SaleCreatedEvent>("sales_queue"))
             );
 
             builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -66,8 +98,8 @@ public class Program
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseBasicHealthChecks();
-
+            //app.UseBasicHealthChecks();
+            app.Services.StartRebus();
             app.MapControllers();
 
             app.Run();
