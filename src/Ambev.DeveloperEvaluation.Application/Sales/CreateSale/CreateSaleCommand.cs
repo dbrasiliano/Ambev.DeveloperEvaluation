@@ -1,6 +1,5 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Sales.Createsale;
 using Ambev.DeveloperEvaluation.Common.Validation;
-using Ambev.DeveloperEvaluation.Domain.Entities;
 using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
@@ -9,15 +8,13 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
     {
         public string SaleNumber { get; set; } = string.Empty;
 
-        public decimal TotalAmount { get; set; }
-
         public string BranchId { get; set; } = string.Empty;
 
         public string CustomerId { get; set; } = string.Empty;
 
         public bool IsCancelled { get; set; }
 
-        public List<SaleItem>? Items { get; set; }
+        public List<CreateSaleItemCommand>? Items { get; set; }
 
         public ValidationResultDetail Validate()
         {
@@ -29,5 +26,14 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
                 Errors = result.Errors.Select(o => (ValidationErrorDetail)o)
             };
         }
+    }
+
+    public class CreateSaleItemCommand
+    {
+        public string ProductId { get; set; } = string.Empty;
+
+        public int Quantity { get; set; }
+
+        public decimal UnitPrice { get; set; }
     }
 }

@@ -5,7 +5,6 @@ using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Infrastructure.Messaging;
 using AutoMapper;
 using MediatR;
-using Rebus.Bus;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
 {
@@ -13,9 +12,9 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
     {
         private readonly ISaleRepository _saleRepository;
         private readonly IMapper _mapper;
-        private readonly MessagingService _messagingService;
+        private readonly IMessagingService _messagingService;
 
-        public CreateSaleHandler(ISaleRepository saleRepository, IMapper mapper, MessagingService messagingService)
+        public CreateSaleHandler(ISaleRepository saleRepository, IMapper mapper, IMessagingService messagingService)
         {
             _saleRepository = saleRepository;
             _mapper = mapper;
@@ -36,7 +35,27 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
                 };
             }
 
-            var sale = _mapper.Map<Sale>(command);
+            var sale = new Sale
+            {
+                SaleNumber = command.SaleNumber,
+                BranchId = command.BranchId,
+                CustomerId = command.CustomerId,
+                CreatedAt = DateTime.UtcNow,
+                IsCancelled = command.IsCancelled
+            };
+
+            if (command.Items != null)
+            {
+                foreach (var item in command.Items)
+                {
+                    sale.AddItem(new SaleItem
+                    {
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice
+                    });
+                }
+            }
 
             try
             {

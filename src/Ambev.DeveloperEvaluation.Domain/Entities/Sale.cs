@@ -16,9 +16,9 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         public string SaleNumber { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or sets the total amount for the sale.
+        /// Gets the total amount for the sale, calculated from the items.
         /// </summary>
-        public decimal TotalAmount { get; set; }
+        public decimal TotalAmount { get; private set; } // Private set to prevent external modification
 
         /// <summary>
         /// Gets or sets the branch where the sale was made.
@@ -36,18 +36,6 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         public bool IsCancelled { get; set; }
 
         /// <summary>
-        /// Gets or sets the list of items in the sale.
-        /// </summary>
-        public List<SaleItem> Items { get; set; } = new List<SaleItem>();
-
-        /// <summary>
-        /// Gets the unique identifier of the sale.
-        /// </summary>
-        string ISale.Id => Id.ToString();
-
-        IEnumerable<ISaleItem> ISale.Items => new List<SaleItem>();
-
-        /// <summary>
         /// Gets or sets the date and time when the sale was created.
         /// </summary>
         public DateTime CreatedAt { get; set; }
@@ -57,6 +45,59 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         /// </summary>
         public DateTime? UpdatedAt { get; set; }
 
+        /// <summary>
+        /// Gets the unique identifier of the sale.
+        /// </summary>
+        string ISale.Id => Id.ToString();
+
+        IEnumerable<ISaleItem> ISale.Items => Items;
+
+        /// <summary>
+        /// Private list to store sale items.
+        /// </summary>
+        private List<SaleItem> _items = new List<SaleItem>();
+
+        /// <summary>
+        /// Gets or sets the list of items in the sale.
+        /// Whenever the items are updated, the total amount is recalculated.
+        /// </summary>
+        public List<SaleItem> Items
+        {
+            get => _items;
+            set
+            {
+                _items = value ?? new List<SaleItem>();
+                UpdateTotalAmount();
+            }
+        }
+
+        /// <summary>
+        /// Updates the total amount based on the sum of all items.
+        /// </summary>
+        private void UpdateTotalAmount()
+        {
+            TotalAmount = Items.Sum(item => item.Quantity * item.UnitPrice);
+        }
+
+        /// <summary>
+        /// Adds an item to the sale and updates the total amount.
+        /// </summary>
+        public void AddItem(SaleItem item)
+        {
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            _items.Add(item);
+            UpdateTotalAmount();
+        }
+
+        /// <summary>
+        /// Removes an item from the sale and updates the total amount.
+        /// </summary>
+        public void RemoveItem(SaleItem item)
+        {
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            _items.Remove(item);
+            UpdateTotalAmount();
+        }
 
         /// <summary>
         /// Validates the sale using the SaleValidator rules.

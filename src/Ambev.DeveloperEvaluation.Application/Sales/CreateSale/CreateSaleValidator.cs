@@ -11,9 +11,6 @@ public class CreateSaleCommandValidator : AbstractValidator<CreateSaleCommand>
                 .NotEmpty().WithMessage("O número da venda é obrigatório.")
                 .MaximumLength(50).WithMessage("O número da venda deve ter no máximo 50 caracteres.");
 
-        RuleFor(x => x.TotalAmount)
-            .GreaterThan(0).WithMessage("O valor total da venda deve ser maior que zero.");
-
         RuleFor(x => x.BranchId)
             .NotEmpty().WithMessage("O ID da filial é obrigatório.");
 

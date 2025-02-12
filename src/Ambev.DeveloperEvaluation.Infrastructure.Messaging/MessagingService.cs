@@ -2,7 +2,7 @@
 
 namespace Ambev.DeveloperEvaluation.Infrastructure.Messaging
 {
-    public class MessagingService
+    public class MessagingService : IMessagingService
     {
         private readonly IBus _bus;
 
