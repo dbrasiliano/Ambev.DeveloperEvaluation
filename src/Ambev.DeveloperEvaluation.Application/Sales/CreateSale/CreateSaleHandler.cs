@@ -5,6 +5,7 @@ using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Infrastructure.Messaging;
 using AutoMapper;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
 {
@@ -13,21 +14,27 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
         private readonly ISaleRepository _saleRepository;
         private readonly IMapper _mapper;
         private readonly IMessagingService _messagingService;
+        private readonly ILogger<CreateSaleHandler> _logger;
 
-        public CreateSaleHandler(ISaleRepository saleRepository, IMapper mapper, IMessagingService messagingService)
+        public CreateSaleHandler(ISaleRepository saleRepository, IMapper mapper, IMessagingService messagingService, ILogger<CreateSaleHandler> logger)
         {
             _saleRepository = saleRepository;
             _mapper = mapper;
             _messagingService = messagingService;
+            _logger = logger;
         }
 
         public async Task<CreateSaleResult> Handle(CreateSaleCommand command, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Iniciando o processamento do comando CreateSale para a venda {SaleNumber}", command.SaleNumber);
+
             var validator = new CreateSaleCommandValidator();
             var validationResult = await validator.ValidateAsync(command, cancellationToken);
 
             if (!validationResult.IsValid)
             {
+                _logger.LogWarning("Validação falhou para a venda {SaleNumber}: {Errors}", command.SaleNumber,
+                    string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage)));
                 return new CreateSaleResult
                 {
                     Success = false,
@@ -61,6 +68,8 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
             {
                 var createdSale = await _saleRepository.CreateAsync(sale, cancellationToken);
 
+                _logger.LogInformation("Venda criada com sucesso. SaleId: {SaleId}", createdSale.Id);
+
                 var saleCreatedEvent = new SaleCreatedEvent
                 {
                     SaleId = createdSale.Id,
@@ -78,6 +87,8 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
 
                 await _messagingService.SendMessageAsync(saleCreatedEvent);
 
+                _logger.LogInformation("Evento SaleCreatedEvent publicado para a venda {SaleId}", createdSale.Id);
+
                 return new CreateSaleResult
                 {
                     Success = true,
@@ -89,6 +100,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Erro ao criar a venda {SaleNumber}", command.SaleNumber);
                 return new CreateSaleResult
                 {
                     Success = false,
