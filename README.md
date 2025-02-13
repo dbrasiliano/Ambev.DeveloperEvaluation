@@ -1,2 +1,2 @@
-Criado o endpoint /Sales onde vc incluir uma venda e seus itens
+Criado o endpoint /Sales onde vc inclui uma venda e seus itens
 Testes criados tb
