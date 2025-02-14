@@ -4,7 +4,9 @@ using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Infrastructure.Messaging;
 using Ambev.DeveloperEvaluation.Unit.Application.TestData;
 using AutoMapper;
+using Castle.Core.Logging;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
@@ -15,14 +17,16 @@ namespace Ambev.DeveloperEvaluation.Unit.Application
         private readonly ISaleRepository _saleRepository;
         private readonly IMapper _mapper;
         private readonly IMessagingService _messagingService;
+        private readonly ILogger<CreateSaleHandler> _logger;
         private readonly CreateSaleHandler _handler;
-
+        
         public CreateSaleHandlerTests()
         {
             _saleRepository = Substitute.For<ISaleRepository>();
             _mapper = Substitute.For<IMapper>();
             _messagingService = Substitute.For<IMessagingService>();
-            _handler = new CreateSaleHandler(_saleRepository, _mapper, _messagingService);
+            _logger = Substitute.For<ILogger<CreateSaleHandler>>();
+            _handler = new CreateSaleHandler(_saleRepository, _mapper, _messagingService, _logger);
         }
 
         [Fact(DisplayName = "Given valid sale data When creating sale Then returns success response")]
